@@ -5,6 +5,8 @@ import { findFiles, getPagesDirectory } from "./utils.js";
 const NEXTJS_NON_ROUTABLE = ["/_app", "/_document", "/_error", "/middleware"];
 const DYNAMIC_SEGMENT_RE = /\[(.*?)\]/g;
 
+const VALID_IDENTIFIER_RE = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+
 type QueryType = "dynamic" | "catch-all" | "optional-catch-all";
 
 interface Route {
@@ -62,7 +64,10 @@ function getQueryInterface(
 ): [query: string, requiredKeys: number] {
   let requiredKeys = 0;
   const keys = Object.entries(query)
-    .map(([key, value]) => {
+    .map(([rawKey, value]) => {
+      const key = VALID_IDENTIFIER_RE.test(rawKey)
+        ? rawKey
+        : JSON.stringify(rawKey);
       switch (value) {
         case "dynamic": {
           requiredKeys += 1;

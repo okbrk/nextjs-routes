@@ -65,6 +65,16 @@ describe("route generation", () => {
     expect(writeFileSyncMock.mock.calls).toMatchSnapshot();
   });
 
+  it("quotes query keys that are not valid identifiers", () => {
+    getPagesDirectoryMock.mockReturnValueOnce("pages");
+    findFilesMock.mockReturnValueOnce(["pages/api/[...as-proxy].ts"]);
+    writeFileSyncMock.mockClear();
+    cli();
+    expect(writeFileSyncMock.mock.calls[0][1]).toContain(
+      'query: Query<{ "as-proxy": string[] }>'
+    );
+  });
+
   const consoleError = jest
     .spyOn(console, "error")
     .mockReturnValueOnce(undefined);
